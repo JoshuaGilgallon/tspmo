@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Feed - PiX Security</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function takeImage() {
+            fetch('/takeimage')
+                .then(() => {
+                    showNotification('Image capture initiated');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not take image', 'error');
+                });
+        }
+        
+        function takeVideo() {
+            const seconds = document.getElementById('video-duration').value;
+            if (!seconds || isNaN(seconds) || seconds < 1) {
+                showNotification('Please enter a valid duration in seconds', 'error');
+                return;
+            }
+            
+            fetch(`/takevideo/${seconds}`)
+                .then(() => {
+                    showNotification(`Recording ${seconds} second video`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not start recording', 'error');
+                });
+        }
+        
+        function aiDetect() {
+            fetch('/aidetect')
+                .then(() => {
+                    showNotification('AI detection initiated');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not start AI detection', 'error');
+                });
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }, 10);
+        }
+    </script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container">
+            <h1 class="logo">PiX</h1>
+            <p class="tagline">Security Simplified</p>
+        </div>
+        <nav class="main-nav">
+            <a href="/">Home</a>
+            <a href="/feed">Live Feed</a>
+            <a href="/captures">Captures</a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h2>Live Camera Feed</h2>
+        </div>
+        
+        <div class="feed-container">
+            <div class="video-stream">
+                <!-- Video feed will be displayed here -->
+                <div class="placeholder-video">
+                    <p>Live video stream loading...</p>
+                </div>
+            </div>
+            
+            <div class="camera-controls">
+                <h3>Camera Controls</h3>
+                
+                <div class="control-section">
+                    <button class="btn camera-btn" onclick="takeImage()">Take Image</button>
+                    
+                    <div class="video-control">
+                        <input type="number" id="video-duration" min="1" max="60" value="5" placeholder="Duration (seconds)">
+                        <button class="btn camera-btn" onclick="takeVideo()">Record Video</button>
+                    </div>
+                    
+                    <button class="btn camera-btn ai-btn" onclick="aiDetect()">AI Detection</button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn control-btn">Pause</button>
+                <button class="btn control-btn">Settings</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 PiX Security</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiX Security</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function takeImage() {
+            fetch('/takeimage')
+                .then(() => {
+                    showNotification('Image capture initiated');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not take image', 'error');
+                });
+        }
+        
+        function showVideoModal() {
+            document.getElementById('video-modal').style.display = 'flex';
+        }
+        
+        function closeVideoModal() {
+            document.getElementById('video-modal').style.display = 'none';
+        }
+        
+        function takeVideo() {
+            const seconds = document.getElementById('video-duration').value;
+            if (!seconds || isNaN(seconds) || seconds < 1) {
+                showNotification('Please enter a valid duration in seconds', 'error');
+                return;
+            }
+            
+            closeVideoModal();
+            
+            fetch(`/takevideo/${seconds}`)
+                .then(() => {
+                    showNotification(`Recording ${seconds} second video`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not start recording', 'error');
+                });
+        }
+        
+        function aiDetect() {
+            fetch('/aidetect')
+                .then(() => {
+                    showNotification('AI detection initiated');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error: Could not start AI detection', 'error');
+                });
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }, 10);
+        }
+    </script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container">
+            <h1 class="logo">PiX</h1>
+            <p class="tagline">Security Simplified</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="hero">
+            <h2>Camera Controls</h2>
+            <p>Take images, record videos, and use AI detection with simple clicks</p>
+        </div>
+        
+        <div class="button-container">
+            <button class="btn primary-btn" onclick="takeImage()">Take Image</button>
+            <button class="btn secondary-btn" onclick="showVideoModal()">Record Video</button>
+            <button class="btn ai-btn" onclick="aiDetect()">AI Detection</button>
+        </div>
+    </main>
+
+    <!-- Video Duration Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeVideoModal()">&times;</span>
+            <h3>Enter Video Duration</h3>
+            <div class="video-input">
+                <input type="number" id="video-duration" min="1" max="60" value="5" placeholder="Duration (seconds)">
+                <button class="btn primary-btn" onclick="takeVideo()">Start Recording</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 PiX Security</p>
+    </footer>
+</body>
+</html>

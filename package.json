@@ -1,0 +1,13 @@
+{
+  "name": "pix-security",
+  "version": "1.0.0",
+  "description": "Security camera web interface",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "axios": "^0.24.0"
+  }
+}
