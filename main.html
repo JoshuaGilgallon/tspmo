@@ -6,8 +6,17 @@
     <title>PiX Security</title>
     <link rel="stylesheet" href="styles.css">
     <script>
+        // Camera API base URL - configure this to point to your API
+        const CAMERA_API_BASE_URL = 'https://localhost:5000';
+        
         function takeImage() {
-            fetch('/takeimage')
+            fetch(`${CAMERA_API_BASE_URL}/takeimage`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
                 .then(() => {
                     showNotification('Image capture initiated');
                 })
@@ -34,7 +43,13 @@
             
             closeVideoModal();
             
-            fetch(`/takevideo/${seconds}`)
+            fetch(`${CAMERA_API_BASE_URL}/takevideo/${seconds}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
                 .then(() => {
                     showNotification(`Recording ${seconds} second video`);
                 })
@@ -45,7 +60,13 @@
         }
         
         function aiDetect() {
-            fetch('/aidetect')
+            fetch(`${CAMERA_API_BASE_URL}/aidetect`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
                 .then(() => {
                     showNotification('AI detection initiated');
                 })
