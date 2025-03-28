@@ -9,20 +9,74 @@
         // Camera API base URL - configure this to point to your API
         const CAMERA_API_BASE_URL = 'https://localhost:5000';
         
+        // Helper function for making API requests
+        async function makeApiRequest(endpoint, params = {}) {
+            // Create URL with query parameters if any
+            let url = `${CAMERA_API_BASE_URL}${endpoint}`;
+            
+            // Add query parameters if they exist
+            if (Object.keys(params).length > 0) {
+                const queryParams = new URLSearchParams();
+                for (const key in params) {
+                    queryParams.append(key, params[key]);
+                }
+                url = `${url}?${queryParams.toString()}`;
+            }
+            
+            // Create request options
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors',  // Enable CORS
+                cache: 'no-cache',
+                credentials: 'same-origin'
+            };
+            
+            try {
+                // Create AbortController for timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                
+                const response = await fetch(url, { 
+                    ...options, 
+                    signal: controller.signal 
+                });
+                
+                // Clear timeout
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`API responded with status: ${response.status}`);
+                }
+                
+                // Try to parse JSON, fall back to text if not JSON
+                try {
+                    return await response.json();
+                } catch (e) {
+                    return await response.text();
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timed out');
+                }
+                throw error;
+            }
+        }
+        
         function takeImage() {
-            fetch(`${CAMERA_API_BASE_URL}/takeimage`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(() => {
-                    showNotification('Image capture initiated');
+            showNotification('Initiating image capture...', 'info');
+            
+            makeApiRequest('/takeimage')
+                .then(data => {
+                    console.log('Image capture response:', data);
+                    showNotification('Image capture successful');
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error: Could not take image', 'error');
+                    console.error('Error taking image:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
                 });
         }
         
@@ -42,37 +96,30 @@
             }
             
             closeVideoModal();
+            showNotification(`Initiating ${seconds} second video recording...`, 'info');
             
-            fetch(`${CAMERA_API_BASE_URL}/takevideo/${seconds}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(() => {
+            makeApiRequest(`/takevideo/${seconds}`)
+                .then(data => {
+                    console.log('Video recording response:', data);
                     showNotification(`Recording ${seconds} second video`);
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error: Could not start recording', 'error');
+                    console.error('Error recording video:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
                 });
         }
         
         function aiDetect() {
-            fetch(`${CAMERA_API_BASE_URL}/aidetect`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(() => {
-                    showNotification('AI detection initiated');
+            showNotification('Initiating AI detection...', 'info');
+            
+            makeApiRequest('/aidetect')
+                .then(data => {
+                    console.log('AI detection response:', data);
+                    showNotification('AI detection successful');
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error: Could not start AI detection', 'error');
+                    console.error('Error with AI detection:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
                 });
         }
         

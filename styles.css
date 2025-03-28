@@ -209,6 +209,10 @@ body {
     background-color: #f44336;
 }
 
+.notification.info {
+    background-color: #2196F3;
+}
+
 .notification.show {
     top: 20px;
 }
